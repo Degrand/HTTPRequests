@@ -4,9 +4,7 @@
 
 """
 
-import sys
-
-from connection import WebSocket
+from connection import HttpSocket
 from message import HttpRequestMessage, HttpResponseMessage
 
 class HttpRequest(object):
@@ -24,54 +22,51 @@ class HttpRequest(object):
         """ Perform a GET request to server """
 
         self.request = HttpRequestMessage('GET', page, self.dest)
-        s = WebSocket(self.dest, 80)
-        print self.request
-        s.send(self.request.message)
-        response, headers, body = self.split_response(s.recv())
-        self.response = HttpResponseMessage(response, headers, body)
+        self.send_request()
 
     def post(self, page, headers=None, data=""):
 
         """ Perform a POST request to server """
 
         self.request = Message('POST', page, self.dest)
-        s = WebSocket(self.dest, 80)
-        print self.request
+        self.send_request()
+
+    def send_request(self):
+
+        """ Send request message to destination server """
+        s = HttpSocket(self.dest, 80)
         s.send(self.request.message)
-        response, headers, body = self.split_response(s.recv())
+        response, headers, body = self.recieve_response(s)
         self.response = HttpResponseMessage(response, headers, body)
 
-    def split_response(self, resp):
+    def recieve_response(self, sock):
 
-        """ Chops up raw_response into response, headers and body """
-        s = resp.find('\r\n')
-        response = resp[:s].rstrip()
-        resp = resp[s+2:]
-        s = resp.find('\r\n\r\n')
-        header_data = resp[:s].rstrip()
-        headers = self.parse_headers(header_data)
-        if header_data.endswith('Transfer-Encoding: chunked'):
-            body = resp[s+12:].rstrip().lstrip()
-        else:
-            body = resp[s+4:].rstrip().lstrip()
-
+        """ Parse server HTTP response """
+        response = sock.readline()
+        headers = self.parse_headers(sock.recv('\r\n'))
+        bodysize = self.get_bodysize(headers, sock)
+        body = sock.recv(size=bodysize)
         return (response, headers, body)
+
+    def get_bodysize(self, headers, sock):
+
+        """ Find appropriate header for packet size """
+        if 'Content-Length' in headers:
+            size = int(headers['Content-Length'])
+        elif headers.get('Transfer-Encoding') == 'chunked':
+            size = int(sock.readline(), 16)
+        else:
+            print "ERROR: No length specified in headers"
+            size = 0
+        return size
 
     def parse_headers(self, header_data):
 
         """ Converts header string into dictionary """
-        headers = [k.split(':') for k in header_data.split('\r\n')]
-        return {k[0]:k[1] for k in headers}
+        headers = [k.split(':') for k in header_data.split('\r\n') if k]
+        return {clean(k[0]):clean(k[1]) for k in headers}
         
+def clean(val):
 
-if __name__ == "__main__":
-
-    host = 'localhost'
-    debug = False
-    if len(sys.argv) > 1:
-        host = sys.argv[1]
-    if len(sys.argv) > 2:
-        debug = bool(sys.argv[2])
-    hreq = HttpRequest(host, debug)
-    hreq.get('/')
-    print hreq.response
+    """ Remove whitespace and return characters from value """
+    return val.rstrip().lstrip()
