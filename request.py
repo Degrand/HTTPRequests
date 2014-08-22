@@ -43,7 +43,7 @@ class HttpRequest(object):
 
         """ Parse server HTTP response """
         response = sock.readline()
-        headers = self.parse_headers(sock.recv('\r\n'))
+        headers = self.parse_headers(sock.recv(until='\r\n'))
         bodysize = self.get_bodysize(headers, sock)
         body = sock.recv(size=bodysize)
         return (response, headers, body)
