@@ -1,5 +1,4 @@
 import datetime
-import socket
 
 class HttpRequestMessage(object):
 
@@ -25,7 +24,7 @@ class HttpRequestMessage(object):
         request = self.create_request()
         headers = self.create_headers()
         data = self.body
-        return "%s%s\r\n%s\r\n" % (request, headers, data)
+        return "%s%s\r\n%s" % (request, headers, data)
 
     def create_request(self):
 
@@ -38,33 +37,33 @@ class HttpRequestMessage(object):
         """ Create common HTTP requests headers """
         date = self.headers.get('date', get_datetime())
         conn = self.headers.get('conn', 'keep-alive')
-        hostip = socket.gethostbyname(socket.gethostname())
-        host = self.headers.get('host', hostip)
+        host = self.headers.get('host', self.dest)
         from_ = self.headers.get('from', 'bot@no.com')
         accept = self.headers.get('accept', 'text/html, text/plain')
         user_agent = self.headers.get('user-agent', 'RequestBot_0.1')
         
-        headers = ("Connection: %s\r\n"
+        headers = ("Host: %s\r\n"
+                   "Connection: %s\r\n"
                    "Date: %s\r\n"
-                   "Host: %s\r\n"
                    "From: %s\r\n"
                    "Accept: %s\r\n"
-                   "User-Agent: %s\r\n") % (conn, date, host, from_, 
+                   "User-Agent: %s\r\n") % (host, conn, date, from_, 
                                              accept, user_agent)
         return headers
 
 class HttpResponseMessage(object):
 
+    """ Object to encapsulate the concept of an HTTP Response """
     def __init__(self, response, headers, body):
 
-        """ This should handle raw input from server """
+        """ NOTE: This should handle raw input from server """
         self.response = response
         self.headers = headers
         self.body = body
 
     def __str__(self):
 
-        return self.response
+        return self.response+" "+'\n'.join([k for k in self.headers])
 
 def get_datetime(dt=None):
 
