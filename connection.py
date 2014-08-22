@@ -2,7 +2,7 @@ import socket
 
 class HttpSocket(object):
 
-    """ Simple socket class to handle HTTP messagnig between servers"""
+    """ Simple socket class to handle HTTP messaging between servers"""
 
     def __init__(self, host, port=80):
 
