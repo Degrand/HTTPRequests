@@ -1,15 +1,16 @@
 import socket
 
-class WebSocket(object):
+class HttpSocket(object):
 
-    """ Simple socket class to handle TCP messaging between servers"""
+    """ Simple socket class to handle HTTP messagnig between servers"""
 
-    def __init__(self, host, port):
+    def __init__(self, host, port=80):
 
         """ Websocket composed of a host (ip) and port number """
-        self.host = host
+        self.host = socket.gethostbyname(host)
         self.port = port
         self.conn = self.connect()
+        self.rfile = self.conn.makefile()
 
     def connect(self):
 
@@ -23,11 +24,19 @@ class WebSocket(object):
         """ Send HTTP request to host """
         self.conn.send(msg)
 
-    def recv(self, size=1024):
+    def recv(self, size=1024, until=None):
 
         """ Recieve HTTP response from host """
-        outdata, data = "", ""
-        while not data.endswith('\r\n\r\n'): #This is a bad conditional
-            data = self.conn.recv(size)
-            outdata += data
-        return outdata
+        if until:
+            line, outstring = "", ""
+            while line != until:
+                outstring += line
+                line = self.rfile.readline()
+            return outstring
+        else:
+            return self.rfile.read(size)
+
+    def readline(self):
+
+        """ Read a line off socket """
+        return self.rfile.readline()
