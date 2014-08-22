@@ -4,7 +4,7 @@
 
 """
 
-from connection import HttpSocket
+from connection import WebSocket
 from message import HttpRequestMessage, HttpResponseMessage
 
 class HttpRequest(object):
@@ -34,7 +34,7 @@ class HttpRequest(object):
     def send_request(self):
 
         """ Send request message to destination server """
-        s = HttpSocket(self.dest, 80)
+        s = WebSocket(self.dest, 80)
         s.send(self.request.message)
         response, headers, body = self.recieve_response(s)
         self.response = HttpResponseMessage(response, headers, body)

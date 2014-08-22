@@ -1,8 +1,8 @@
 import socket
 
-class HttpSocket(object):
+class WebSocket(object):
 
-    """ Simple socket class to handle HTTP messaging between servers"""
+    """ Simple socket class to handle TCP messaging between servers """
 
     def __init__(self, host, port=80):
 
