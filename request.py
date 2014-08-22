@@ -36,10 +36,10 @@ class HttpRequest(object):
         """ Send request message to destination server """
         s = WebSocket(self.dest, 80)
         s.send(self.request.message)
-        response, headers, body = self.recieve_response(s)
+        response, headers, body = self.receive_response(s)
         self.response = HttpResponseMessage(response, headers, body)
 
-    def recieve_response(self, sock):
+    def receive_response(self, sock):
 
         """ Parse server HTTP response """
         response = sock.readline()
