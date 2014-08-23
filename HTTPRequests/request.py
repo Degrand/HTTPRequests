@@ -6,8 +6,8 @@
 
 import sys
 
-from connection import WebSocket
-from message import HttpRequestMessage, HttpResponseMessage
+from HTTPRequests.connection import WebSocket
+from HTTPRequests.message import HttpRequestMessage, HttpResponseMessage
 
 class HttpRequest(object):
 
@@ -73,7 +73,7 @@ class HttpRequest(object):
     def parse_location(self, loc):
 
         """ Splits location header value into host and page """
-        loc = loc.strip('http:').strip('https:').strip('//')
+        loc = loc.replace('http:', '').replace('https:', '').replace('//', '')
         s = loc.find('/')
         self.host = loc[:s]
         return loc[s:]
