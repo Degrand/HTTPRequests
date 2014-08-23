@@ -13,29 +13,30 @@ class HttpRequest(object):
 
     """ HTTP Request to server for some resource """
 
-    def __init__(self, dest):
+    def __init__(self, host):
 
-        self.dest = dest 
+        self.host = host
+        self.port = self.check_port()
         self.request = None
         self.response = None
         self.redirect_count = 0
 
-    def get(self, page, headers=None):
+    def get(self, page='/', headers=None):
 
-        """ Perform a GET request to server """
-        self.request = HttpRequestMessage('GET', page, self.dest)
+        """ Perform a GET request to host """
+        self.request = HttpRequestMessage('GET', page, self.host)
         self.do_request()
 
-    def post(self, page, headers=None, data=""):
+    def post(self, page='/', headers=None, data=""):
 
-        """ Perform a POST request to server """
-        self.request = Message('POST', page, self.dest)
+        """ Perform a POST request to host """
+        self.request = Message('POST', page, self.host)
         self.do_request()
 
     def do_request(self):
 
         """ Send request message to destination server """
-        s = WebSocket(self.dest, 80)
+        s = WebSocket(self.host, self.port)
         s.send(self.request.message)
         response, headers, body = self.receive_response(s)
         self.response = HttpResponseMessage(response, headers, body)
@@ -47,12 +48,28 @@ class HttpRequest(object):
             page = self.parse_location(headers.get('Location', ''))
             self.get(page)
 
+    def check_port(self):
+
+        """ Checks to see if port is attached to host """
+        parsed_host = self.host.strip('http').strip('https').strip('//')
+        if ':' in parsed_host:
+            self.host, port = parsed_host.split(':')
+            s = port.find('/')
+            q = port.find('?')
+            if s != -1:
+                port = port[:s]
+            elif q != -1:
+                port = port[:q]
+            elif len(port) > 0:
+                return int(port)
+        return 80
+
     def parse_location(self, loc):
 
         """ Splits location header value into host and page """
         loc = loc.strip('http:').strip('https:').strip('//')
         s = loc.find('/')
-        self.dest = loc[:s]
+        self.host = loc[:s]
         return loc[s:]
 
     def receive_response(self, sock):
