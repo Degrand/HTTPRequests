@@ -60,10 +60,22 @@ class HttpResponseMessage(object):
         self.response = response
         self.headers = headers
         self.body = body
+        self.status_code, self.status_msg = self.parse_response()
 
     def __str__(self):
 
         return self.response+" "+'\n'.join([k for k in self.headers])
+
+    def get_status_code(self):
+
+        """ Return 3 digit status code of HTTP response """
+        return self.status_code
+
+    def parse_response(self):
+
+        """ Return status code and status message """
+        resplist = self.response.split(' ')
+        return int(resplist[1]), resplist[2]
 
 def get_datetime(dt=None):
 
