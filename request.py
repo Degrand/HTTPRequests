@@ -33,6 +33,12 @@ class HttpRequest(object):
         self.request = Message('POST', page, self.host)
         self.do_request()
 
+    def head(self, page='/', headers=None):
+
+        """ Perform a HEAD request to host """
+        self.request = HttpRequestMessage('HEAD', page, self.host)
+        self.do_request()
+
     def do_request(self):
 
         """ Send request message to destination server """
