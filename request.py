@@ -4,6 +4,8 @@
 
 """
 
+import sys
+
 from connection import WebSocket
 from message import HttpRequestMessage, HttpResponseMessage
 
@@ -11,33 +13,47 @@ class HttpRequest(object):
 
     """ HTTP Request to server for some resource """
 
-    def __init__(self, dest, debug=False):
+    def __init__(self, dest):
 
         self.dest = dest 
         self.request = None
         self.response = None
+        self.redirect_count = 0
 
     def get(self, page, headers=None):
 
         """ Perform a GET request to server """
-
         self.request = HttpRequestMessage('GET', page, self.dest)
-        self.send_request()
+        self.do_request()
 
     def post(self, page, headers=None, data=""):
 
         """ Perform a POST request to server """
-
         self.request = Message('POST', page, self.dest)
-        self.send_request()
+        self.do_request()
 
-    def send_request(self):
+    def do_request(self):
 
         """ Send request message to destination server """
         s = WebSocket(self.dest, 80)
         s.send(self.request.message)
         response, headers, body = self.receive_response(s)
         self.response = HttpResponseMessage(response, headers, body)
+        if self.redirect_count > 3: #Caught in possible redirect loop
+            print "Error: Redirect loop detected. Exiting."
+            sys.exit(1)
+        if self.response.get_status_code() in (301, 302):
+            self.redirect_count += 1
+            page = self.parse_location(headers.get('Location', ''))
+            self.get(page)
+
+    def parse_location(self, loc):
+
+        """ Splits location header value into host and page """
+        loc = loc.strip('http:').strip('https:').strip('//')
+        s = loc.find('/')
+        self.dest = loc[:s]
+        return loc[s:]
 
     def receive_response(self, sock):
 
@@ -64,7 +80,7 @@ class HttpRequest(object):
 
         """ Converts header string into dictionary """
         headers = [k.split(':') for k in header_data.split('\r\n') if k]
-        return {clean(k[0]):clean(k[1]) for k in headers}
+        return {clean(k[0]):clean(':'.join(k[1:])) for k in headers}
         
 def clean(val):
 
