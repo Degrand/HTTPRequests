@@ -83,21 +83,20 @@ class HttpRequest(object):
         """ Parse server HTTP response """
         response = sock.readline()
         headers = self.parse_headers(sock.recv(until='\r\n'))
-        bodysize = self.get_bodysize(headers, sock)
-        body = sock.recv(size=bodysize)
-        return (response, headers, body)
 
-    def get_bodysize(self, headers, sock):
-
-        """ Find appropriate header for packet size """
+        size, body = -1, ""
         if 'Content-Length' in headers:
             size = int(headers['Content-Length'])
-        elif headers.get('Transfer-Encoding') == 'chunked':
-            size = int(sock.readline(), 16)
+            body = sock.recv(size=size)
+        elif headers.get('Transfer-Encoding') == "chunked":
+            while size != 0:
+                size = int(sock.readline(), 16)
+                body += sock.recv(size=size)
+                sock.readline() # pass over \r\n
         else:
-            print "ERROR: No length specified in headers"
-            size = 0
-        return size
+             print "ERROR: No length specified in headers"
+
+        return (response, headers, body)
 
     def parse_headers(self, header_data):
 
