@@ -102,9 +102,4 @@ class HttpRequest(object):
 
         """ Converts header string into dictionary """
         headers = [k.split(':') for k in header_data.split('\r\n') if k]
-        return {clean(k[0]):clean(':'.join(k[1:])) for k in headers}
-        
-def clean(val):
-
-    """ Remove whitespace and return characters from value """
-    return val.rstrip().lstrip()
+        return {k[0].strip():':'.join(k[1:]).strip() for k in headers}
