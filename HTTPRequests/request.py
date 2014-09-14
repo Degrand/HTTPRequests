@@ -24,19 +24,19 @@ class HttpRequest(object):
     def get(self, page='/', headers=None):
 
         """ Perform a GET request to host """
-        self.request = HttpRequestMessage('GET', page, self.host)
+        self.request = HttpRequestMessage('GET', page, self.host, headers)
         self.do_request()
 
     def post(self, page='/', headers=None, data=""):
 
         """ Perform a POST request to host """
-        self.request = Message('POST', page, self.host)
+        self.request = Message('POST', page, self.host, headers, data)
         self.do_request()
 
     def head(self, page='/', headers=None):
 
         """ Perform a HEAD request to host """
-        self.request = HttpRequestMessage('HEAD', page, self.host)
+        self.request = HttpRequestMessage('HEAD', page, self.host, headers)
         self.do_request()
 
     def do_request(self):

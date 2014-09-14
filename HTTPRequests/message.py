@@ -4,7 +4,7 @@ class HttpRequestMessage(object):
 
     """ Object to encapsulate the concept of an HTTP Request """
 
-    def __init__(self, action, page, dest, headers={}, body="", http_ver=1.1):
+    def __init__(self, action, page, dest, headers, body="", http_ver=1.1):
 
         self.action = action
         self.page = page
@@ -35,6 +35,9 @@ class HttpRequestMessage(object):
     def create_headers(self):
 
         """ Create common HTTP requests headers """
+
+        if not self.headers:
+            self.headers = {}
         date = self.headers.get('date', get_datetime())
         conn = self.headers.get('conn', 'keep-alive')
         host = self.headers.get('host', self.dest)
