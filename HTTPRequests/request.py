@@ -30,7 +30,8 @@ class HttpRequest(object):
     def post(self, page='/', headers=None, data=""):
 
         """ Perform a POST request to host """
-        self.request = Message('POST', page, self.host, headers, data)
+        self.request = HttpRequestMessage('POST', page, 
+                                              self.host, headers, data)
         self.do_request()
 
     def head(self, page='/', headers=None):
@@ -94,7 +95,7 @@ class HttpRequest(object):
                 body += sock.recv(size=size)
                 sock.readline() # pass over \r\n
         else:
-             print "ERROR: No length specified in headers"
+            print "ERROR: No length specified in headers"
 
         return (response, headers, body)
 
