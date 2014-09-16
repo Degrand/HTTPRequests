@@ -21,20 +21,19 @@ class HttpRequest(object):
         self.response = None
         self.redirect_count = 0
 
-    def get(self, page='/', headers=None):
+    def get(self, page='/', headers=None, cookies=None):
 
         """ Perform a GET request to host """
-        self.request = HttpRequestMessage('GET', page, self.host, headers)
+        self.request = HttpRequestMessage('GET', page, self.host, 
+                                              headers, cookies=cookies)
         self.do_request()
 
-    def post(self, page='/', headers=None, data=""):
+    def post(self, page='/', headers=None, data="", cookies=None):
 
         """ Perform a POST request to host """
-        if headers is None:
-            headers = {}
         data = encode_data(data)
-        self.request = HttpRequestMessage('POST', page, 
-                                              self.host, headers, data)
+        self.request = HttpRequestMessage('POST', page, self.host, headers, 
+                                              body=data, cookies=cookies)
         self.do_request()
 
     def head(self, page='/', headers=None):
