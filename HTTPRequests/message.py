@@ -113,7 +113,7 @@ class HttpResponseMessage(object):
 
     def __str__(self):
 
-        return self.response+" "+'\n'.join([k for k in self.headers])
+        return self.body
 
     def get_status_code(self):
 
