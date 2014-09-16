@@ -6,7 +6,7 @@ class HttpRequestMessage(object):
 
     def __init__(self, action, page, dest, headers, body="", http_ver=1.1):
 
-        self.action = action
+        self.action = action.upper()
         self.page = page
         self.dest = dest
         self.headers = headers
@@ -29,62 +29,66 @@ class HttpRequestMessage(object):
     def create_request(self):
 
         """ Create request line for resource """
-        params = (self.action.upper(), self.page, self.http_ver)
+        params = (self.action, self.page, self.http_ver)
         return "%s %s HTTP/%s\r\n" % (params)
 
     def create_headers(self):
 
         """ Create common HTTP requests headers """
-        if not self.headers:
+        if self.headers is None:
             self.headers = {}
-        conn = self.headers.get('conn', 'keep-alive')
-        host = self.headers.get('host', self.dest)
-        from_ = self.headers.get('from', 'bot@no.com')
-        user_agent = self.headers.get('user-agent', 'RequestBot_0.1')
- 
-        headers = ("Host: %s\r\n"
-                   "Connection: %s\r\n"
-                   "From: %s\r\n"
-                   "User-Agent: %s\r\n") % (host, conn, from_, user_agent)
+        header_vals = [('connection', 'keep-alive'),
+                       ('host', self.dest),
+                       ('from', 'bot@no.com'),
+                       ('user-agent', 'RequestBot_0.1')]
 
         if self.action == "POST":
-            headers += self.create_POST_headers()
+            header_vals.extend(self.set_POST_headers())
 
         elif self.action == "GET":
-            headers += self.create_GET_headers()
+            header_vals.extend(self.set_GET_headers())
 
-        return headers
+        self.set_header_vals(header_vals)
+        return self.create_header_str()
 
-    def create_POST_headers(self):
+    def create_header_str(self):
+
+        """ Convert header dictionary into valid HTTP Headers """
+        retlist = ["%s: %s\r\n" % (k, v) for k, v in self.headers.iteritems()]
+        return ''.join(retlist)
+
+    def set_POST_headers(self):
 
         """ Create POST specific HTTP request headers """
-        content_type = self.headers.get('content-type', 
-                                        'application/x-www-form-urlencoded')
-        content_len = self.headers.get('content-length', len(self.body))
-        accept = self.headers.get('accept', '*/*')
+        header_vals = [('content-type', 'application/x-www-form-urlencoded'),
+                       ('content-length', len(self.body)),
+                       ('accept', '*/*')]
 
-        headers = ("Accept: %s\r\n" 
-                   "Content-Length: %s\r\n"
-                   "Content-Type: %s\r\n") % (accept, content_len, 
-                                              content_type)
-        return headers
+        return header_vals
 
-    def create_GET_headers(self):
+    def set_GET_headers(self):
 
         """ Create GET specific HTTP request headers """
-        accept = self.headers.get('accept', 'text/html, text/plain')
-        date = self.headers.get('date', get_datetime())
+        header_vals = [('accept', 'text/html, text/plain'),
+                       ('date', get_datetime())]
 
-        headers = ("Accept: %s\r\n"
-                   "Date: %s\r\n" % (accept, date))
-        return headers
+        return header_vals
+
+    def set_header_vals(self, header_vals):
+
+        """ Convert tuple list into key: value pairs for header dict """
+        #NOTE: Possible collisions if value assigned twice with varying case
+        std_dict = {k.title(): v for k, v in self.headers.iteritems()}
+        for k, v in header_vals:
+            std_dict.set_default(k.title(), v)
+        self.headers = std_dict
 
 class HttpResponseMessage(object):
 
     """ Object to encapsulate the concept of an HTTP Response """
     def __init__(self, response, headers, body):
 
-        """ NOTE: This should handle raw input from server """
+        #NOTE: This should handle raw input from server
         self.response = response
         self.headers = headers
         self.body = body
@@ -107,6 +111,7 @@ class HttpResponseMessage(object):
 
 def get_datetime(dt=None):
 
+    """ Get current datetime in standardized format """
     if not dt:
         dt = datetime.datetime.utcnow()
     return dt.strftime('%a, %d %b %Y %H:%M:%S GMT')
