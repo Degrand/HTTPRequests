@@ -35,23 +35,48 @@ class HttpRequestMessage(object):
     def create_headers(self):
 
         """ Create common HTTP requests headers """
-
         if not self.headers:
             self.headers = {}
-        date = self.headers.get('date', get_datetime())
         conn = self.headers.get('conn', 'keep-alive')
         host = self.headers.get('host', self.dest)
         from_ = self.headers.get('from', 'bot@no.com')
-        accept = self.headers.get('accept', 'text/html, text/plain')
         user_agent = self.headers.get('user-agent', 'RequestBot_0.1')
-        
+ 
         headers = ("Host: %s\r\n"
                    "Connection: %s\r\n"
-                   "Date: %s\r\n"
                    "From: %s\r\n"
-                   "Accept: %s\r\n"
-                   "User-Agent: %s\r\n") % (host, conn, date, from_, 
-                                             accept, user_agent)
+                   "User-Agent: %s\r\n") % (host, conn, from_, user_agent)
+
+        if self.action == "POST":
+            headers += self.create_POST_headers()
+
+        elif self.action == "GET":
+            headers += self.create_GET_headers()
+
+        return headers
+
+    def create_POST_headers(self):
+
+        """ Create POST specific HTTP request headers """
+        content_type = self.headers.get('content-type', 
+                                        'application/x-www-form-urlencoded')
+        content_len = self.headers.get('content-length', len(self.body))
+        accept = self.headers.get('accept', '*/*')
+
+        headers = ("Accept: %s\r\n" 
+                   "Content-Length: %s\r\n"
+                   "Content-Type: %s\r\n") % (accept, content_len, 
+                                              content_type)
+        return headers
+
+    def create_GET_headers(self):
+
+        """ Create GET specific HTTP request headers """
+        accept = self.headers.get('accept', 'text/html, text/plain')
+        date = self.headers.get('date', get_datetime())
+
+        headers = ("Accept: %s\r\n"
+                   "Date: %s\r\n" % (accept, date))
         return headers
 
 class HttpResponseMessage(object):
