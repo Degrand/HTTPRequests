@@ -91,6 +91,7 @@ class HttpResponseMessage(object):
         #NOTE: This should handle raw input from server
         self.response = response
         self.headers = headers
+        self.cookies = self.set_cookies()
         self.body = body
         self.status_code, self.status_msg = self.parse_response()
 
@@ -108,6 +109,73 @@ class HttpResponseMessage(object):
         """ Return status code and status message """
         resplist = self.response.split(' ')
         return int(resplist[1]), resplist[2]
+
+    def set_cookies(self):
+
+        """ Check for cookies in response headers """
+        if "Set-Cookie" in self.headers:
+            cookies = {}
+            cookielist = self.headers["Set-Cookie"].split(',')
+            if not isinstance(cookielist, list):
+                cookielist = [cookielist]
+            for cookie in cookielist:
+                fields = cookie.split(';')
+                name, val = fields[0].split('=')
+                path, domain = '/', self.headers.get('Host')
+                args = {}
+                for elem in fields[1:]:
+                    if '=' in elem:
+                        k, v = elem.split('=')
+                        args[k] = v
+                    elif elem.lower() == "secure":
+                        args['Secure'] = True
+                    elif elem.lower() == "httponly":
+                        args['HttpOnly'] = True
+                cookies[name] = Cookie(name, val, domain, path, **args)
+            return cookies
+            
+class Cookie(object):
+
+    """ Encapsulates the values of an HTTP Cookie """
+    def __init__(self, name, value, domain, path, **kwargs):
+        self.name = name
+        self.value = value
+        self.path = path
+        self.domain = domain
+        self.expires = kwargs.get('Expires')
+        self.max_age = kwargs.get('Max-Age')
+        self.secure = kwargs.get('Secure', False)
+        self.httponly = kwargs.get('HttpOnly', False)
+        self.cookie_str = self.set_cookie_str()
+
+    def __str__(self):
+        
+        return self.cookie_str
+
+    def __setattr__(self, name, value):
+        
+        """ Update value and rebuild cookie_str to match """
+        object.__setattr__(self, name, value)
+        if "cookie_str" in self.__dict__ and name != "cookie_str": 
+            #conditional avoids conflict with init assignment
+            self.cookie_str = self.set_cookie_str()
+
+    def set_cookie_str(self):
+
+        """ Creates HTTP valid cookie string """
+        retstring = "%s=%s; Path=%s;" % (self.name, self.value,
+                                                    self.path)
+        if self.domain:
+            retstring += " Domain=%s;" % self.domain
+        if self.expires:
+            retstring += " Expires=%s;" % self.expires
+        if self.max_age:
+            retstring += " Max-Age=%s;" % self.max_age
+        if self.secure:
+            retstring += " Secure;"
+        if self.httponly:
+            retstring += " HttpOnly;"
+        return retstring
 
 def get_datetime(dt=None):
 
