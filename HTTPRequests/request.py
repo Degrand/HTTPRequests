@@ -145,7 +145,7 @@ def url_encode(string):
                    '^':'%5E',
                    '_':'%5F'}
 
-   string = string.replace('%', '%25')
-   for k, v in percent_map.iteritems():
-       string = string.replace(k, v)
-   return string
+    string = string.replace('%', '%25')
+    for k, v in percent_map.iteritems():
+        string = string.replace(k, v)
+    return string
