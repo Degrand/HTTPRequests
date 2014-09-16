@@ -32,8 +32,7 @@ class HttpRequest(object):
         """ Perform a POST request to host """
         if headers is None:
             headers = {}
-        headers['content-type'] = 'application/x-www-form-urlencode'
-        data = encodeData(data)
+        data = encode_data(data)
         self.request = HttpRequestMessage('POST', page, 
                                               self.host, headers, data)
         self.do_request()
@@ -112,7 +111,9 @@ def parse_headers(header_data):
 def encode_data(data):
 
     """ Converts data dictionary into urlencoded string """
-    return '&'.join(["%s=%s" % (k, url_encode(v)) for k, v in data])
+    
+    strlist = ["%s=%s" % (k, url_encode(v)) for k, v in data.iteritems()]
+    return '&'.join(strlist)
     
 def url_encode(string):
 
