@@ -80,7 +80,7 @@ class HttpRequestMessage(object):
         #NOTE: Possible collisions if value assigned twice with varying case
         std_dict = {k.title(): v for k, v in self.headers.iteritems()}
         for k, v in header_vals:
-            std_dict.set_default(k.title(), v)
+            std_dict.setdefault(k.title(), v)
         self.headers = std_dict
 
 class HttpResponseMessage(object):
