@@ -18,7 +18,7 @@ class HttpRequest(object):
         self.host = host
         self.port = self.check_port()
         self.request = None
-        self.response = None
+        self.history = []
         self.redirect_count = 0
 
     def get(self, page='/', headers=None, cookies=None):
@@ -26,7 +26,8 @@ class HttpRequest(object):
         """ Perform a GET request to host """
         self.request = HttpRequestMessage('GET', page, self.host, 
                                               headers, cookies=cookies)
-        self.do_request()
+        self.history.append(self.request)
+        return self.do_request()
 
     def post(self, page='/', headers=None, data="", cookies=None):
 
@@ -34,7 +35,8 @@ class HttpRequest(object):
         data = encode_data(data)
         self.request = HttpRequestMessage('POST', page, self.host, headers, 
                                               body=data, cookies=cookies)
-        self.do_request()
+        self.history.append(self.request)
+        return self.do_request()
 
     def head(self, page='/', headers=None):
 
@@ -47,15 +49,16 @@ class HttpRequest(object):
         """ Send request message to destination server """
         s = WebSocket(self.host, self.port)
         s.send(self.request.message)
-        response, headers, body = self.receive_response(s)
-        self.response = HttpResponseMessage(response, headers, body)
+        status, headers, body = self.receive_response(s)
+        response = HttpResponseMessage(status, headers, body)
         if self.redirect_count > 3: #Caught in possible redirect loop
             print "Error: Redirect loop detected. Exiting."
             sys.exit(1)
-        if self.response.get_status_code() in (301, 302):
+        if response.get_status_code() in (301, 302):
             self.redirect_count += 1
             page = self.parse_location(headers.get('Location', ''))
             self.get(page)
+        return response
 
     def check_port(self):
 
@@ -84,7 +87,7 @@ class HttpRequest(object):
     def receive_response(self, sock):
 
         """ Parse server HTTP response """
-        response = sock.readline()
+        status = sock.readline()
         headers = parse_headers(sock.recv(until='\r\n'))
 
         size, body = -1, ""
@@ -99,7 +102,7 @@ class HttpRequest(object):
         else:
             print "ERROR: No length specified in headers"
 
-        return (response, headers, body)
+        return (status, headers, body)
 
 def parse_headers(header_data):
 
