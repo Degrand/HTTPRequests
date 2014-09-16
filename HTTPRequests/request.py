@@ -30,6 +30,10 @@ class HttpRequest(object):
     def post(self, page='/', headers=None, data=""):
 
         """ Perform a POST request to host """
+        if headers is None:
+            headers = {}
+        headers['content-type'] = 'application/x-www-form-urlencode'
+        data = encodeData(data)
         self.request = HttpRequestMessage('POST', page, 
                                               self.host, headers, data)
         self.do_request()
@@ -83,7 +87,7 @@ class HttpRequest(object):
 
         """ Parse server HTTP response """
         response = sock.readline()
-        headers = self.parse_headers(sock.recv(until='\r\n'))
+        headers = parse_headers(sock.recv(until='\r\n'))
 
         size, body = -1, ""
         if 'Content-Length' in headers:
@@ -99,8 +103,49 @@ class HttpRequest(object):
 
         return (response, headers, body)
 
-    def parse_headers(self, header_data):
+def parse_headers(header_data):
 
-        """ Converts header string into dictionary """
-        headers = [k.split(':') for k in header_data.split('\r\n') if k]
-        return {k[0].strip():':'.join(k[1:]).strip() for k in headers}
+    """ Converts header string into dictionary """
+    headers = [k.split(':') for k in header_data.split('\r\n') if k]
+    return {k[0].strip():':'.join(k[1:]).strip() for k in headers}
+
+def encode_data(data):
+
+    """ Converts data dictionary into urlencoded string """
+    return '&'.join(["%s=%s" % (k, url_encode(v)) for k, v in data])
+    
+def url_encode(string):
+
+    """ Replaces problem characters with appropriate percent encoding """
+    percent_map = {' ':'%20',
+                   '!':'%21',
+                   '\"':'%22',
+                   '#':'%23',
+                   '$':'%24',
+                   '&':'%26',
+                   '\'':'%27',
+                   '(':'%28',
+                   ')':'%29',
+                   '*':'%2A',
+                   '+':'%2B',
+                   ',':'%2C',
+                   '-':'%2D',
+                   '.':'%2E',
+                   '/':'%2F',
+                   ':':'%3A',
+                   ';':'%3B',
+                   '<':'%3C',
+                   '=':'%3D',
+                   '>':'%3E',
+                   '?':'%3F',
+                   '@':'%40',
+                   '[':'%5B',
+                   '\\':'%5C',
+                   ']':'%5D',
+                   '^':'%5E',
+                   '_':'%5F'}
+
+   string = string.replace('%', '%25')
+   for k, v in percent_map.iteritems():
+       string = string.replace(k, v)
+   return string
