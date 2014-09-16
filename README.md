@@ -9,5 +9,5 @@ Example Usage:
     from HTTPRequests.request import HttpRequest
 
     req = HttpRequest('www.w3c.org')
-    hreq.get('/Protocols/rfc2616/ref2616.html')
-    print hreq.response
+    resp = hreq.get('/Protocols/rfc2616/ref2616.html')
+    print resp #This will print response body
