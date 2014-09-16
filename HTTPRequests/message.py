@@ -136,7 +136,8 @@ class HttpResponseMessage(object):
                 cookielist = [cookielist]
             for cookie in cookielist:
                 fields = cookie.split(';')
-                name, val = fields[0].split('=')
+                delim = fields[0].find('=')
+                name, val = fields[0][:delim], fields[0][delim+1:]
                 path, domain = '/', self.headers.get('Host')
                 args = {'Raw-String': cookie}
                 for elem in fields[1:]:
