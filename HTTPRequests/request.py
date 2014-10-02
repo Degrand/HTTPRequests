@@ -64,7 +64,7 @@ class HttpRequest(object):
     def check_port(self):
 
         """ Checks to see if port is attached to host """
-        parsed_host = self.host.strip('http').strip('https').strip('//')
+        parsed_host = self.host.strip('http:').strip('https:').strip('//')
         if ':' in parsed_host:
             self.host, port = parsed_host.split(':')
             s = port.find('/')
