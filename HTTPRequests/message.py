@@ -45,10 +45,10 @@ class HttpRequestMessage(object):
                        ('cookie', self.create_cookie_header())]
 
         if self.action == "POST":
-            header_vals.extend(self.create_POST_headers())
+            header_vals.extend(self.create_post_headers())
 
         elif self.action == "GET":
-            header_vals.extend(self.create_GET_headers())
+            header_vals.extend(self.create_get_headers())
 
         self.set_header_vals(header_vals)
         return self.create_header_str()
@@ -59,7 +59,7 @@ class HttpRequestMessage(object):
         retlist = ["%s: %s\r\n" % (k, v) for k, v in self.headers.iteritems()]
         return ''.join(retlist)
 
-    def create_POST_headers(self):
+    def create_post_headers(self):
 
         """ Create POST specific HTTP request headers """
         header_vals = [('content-type', 'application/x-www-form-urlencoded'),
@@ -68,7 +68,7 @@ class HttpRequestMessage(object):
 
         return header_vals
 
-    def create_GET_headers(self):
+    def create_get_headers(self):
 
         """ Create GET specific HTTP request headers """
         header_vals = [('accept', 'text/html, text/plain'),
@@ -150,7 +150,7 @@ class HttpResponseMessage(object):
                         args['HttpOnly'] = True
                 cookies[name] = Cookie(name, val, domain, path, **args)
             return cookies
-            
+
 class Cookie(object):
 
     """ Encapsulates the values of an HTTP Cookie """
@@ -167,7 +167,7 @@ class Cookie(object):
         self.cookie_str = self.set_cookie_str()
 
     def __str__(self):
-        
+
         return self.cookie_str
 
     def set_cookie_str(self):

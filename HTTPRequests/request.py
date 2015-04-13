@@ -24,8 +24,8 @@ class HttpRequest(object):
     def get(self, page='/', headers=None, cookies=None):
 
         """ Perform a GET request to host """
-        self.request = HttpRequestMessage('GET', page, self.host, 
-                                              headers, cookies=cookies)
+        self.request = HttpRequestMessage('GET', page, self.host,
+                                          headers, cookies=cookies)
         self.history.append(self.request)
         return self.do_request()
 
@@ -33,8 +33,8 @@ class HttpRequest(object):
 
         """ Perform a POST request to host """
         data = encode_data(data)
-        self.request = HttpRequestMessage('POST', page, self.host, headers, 
-                                              body=data, cookies=cookies)
+        self.request = HttpRequestMessage('POST', page, self.host, headers,
+                                          body=data, cookies=cookies)
         self.history.append(self.request)
         return self.do_request()
 
@@ -114,10 +114,10 @@ def parse_headers(header_data):
 def encode_data(data):
 
     """ Converts data dictionary into urlencoded string """
-    
+
     strlist = ["%s=%s" % (k, url_encode(v)) for k, v in data.iteritems()]
     return '&'.join(strlist)
-    
+
 def url_encode(string):
 
     """ Replaces problem characters with appropriate percent encoding """
