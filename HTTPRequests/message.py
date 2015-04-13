@@ -4,12 +4,12 @@ class HttpRequestMessage(object):
 
     """ Object to encapsulate the concept of an HTTP Request """
 
-    def __init__(self, action, page, dest, headers, **kwargs):
+    def __init__(self, action, page, dest, **kwargs):
 
         self.action = action.upper()
         self.page = page
         self.dest = dest
-        self.headers = headers
+        self.headers = kwargs.get('headers', {})
         self.body = kwargs.get('body', "")
         self.http_ver = kwargs.get('http_version', '1.1')
         self.cookies = kwargs.get('cookies', {})

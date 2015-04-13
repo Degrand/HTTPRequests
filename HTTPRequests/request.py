@@ -25,7 +25,7 @@ class HttpRequest(object):
 
         """ Perform a GET request to host """
         self.request = HttpRequestMessage('GET', page, self.host,
-                                          headers, cookies=cookies)
+                                          headers=headers, cookies=cookies)
         self.history.append(self.request)
         return self.do_request()
 
@@ -33,15 +33,17 @@ class HttpRequest(object):
 
         """ Perform a POST request to host """
         data = encode_data(data)
-        self.request = HttpRequestMessage('POST', page, self.host, headers,
-                                          body=data, cookies=cookies)
+        self.request = HttpRequestMessage('POST', page, self.host,
+                                          headers=headers, body=data,
+                                          cookies=cookies)
         self.history.append(self.request)
         return self.do_request()
 
     def head(self, page='/', headers=None):
 
         """ Perform a HEAD request to host """
-        self.request = HttpRequestMessage('HEAD', page, self.host, headers)
+        self.request = HttpRequestMessage('HEAD', page, self.host,
+                                          headers=headers)
         self.history.append(self.request)
         return self.do_request()
 
