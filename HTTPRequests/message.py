@@ -9,7 +9,7 @@ class HttpRequestMessage(object):
         self.method = method.upper()
         self.page = page
         self.dst = dst
-        self.headers = headers
+        self.headers = self.create_headers(headers)
         self.body = kwargs.get('body', "")
         self.http_ver = kwargs.get('http_version', '1.1')
         self.cookies = kwargs.get('cookies', {})
@@ -23,7 +23,7 @@ class HttpRequestMessage(object):
 
         """ Create message, header and body, then assemble for HTTP Request """
         request = self.create_request()
-        headers = self.create_headers()
+        headers = self.create_header_str()
         data = self.body
         return "%s%s\r\n%s" % (request, headers, data)
 
@@ -33,13 +33,11 @@ class HttpRequestMessage(object):
         params = (self.method, self.page, self.http_ver)
         return "%s %s HTTP/%s\r\n" % (params)
 
-    def create_headers(self):
+    def create_headers(self, headers=None):
 
         """ Create common HTTP requests headers """
-        if self.headers is None:
-            self.headers = {}
         header_vals = [('connection', 'keep-alive'),
-                       ('host', self.dest),
+                       ('host', self.dst),
                        ('from', 'bot@no.com'),
                        ('user-agent', 'RequestBot_0.1'),
                        ('cookie', self.create_cookie_header())]
@@ -50,8 +48,7 @@ class HttpRequestMessage(object):
         elif self.method == "GET":
             header_vals.extend(self.create_GET_headers())
 
-        self.set_header_vals(header_vals)
-        return self.create_header_str()
+        return self.merge_header_vals(header_vals, headers)
 
     def create_header_str(self):
 
@@ -76,15 +73,17 @@ class HttpRequestMessage(object):
 
         return header_vals
 
-    def set_header_vals(self, header_vals):
+    def merge_header_vals(self, header_vals, headers):
 
         """ Convert tuple list into key: value pairs for header dict """
         #NOTE: Possible collisions if value assigned twice with varying case
-        std_dict = {k.title(): v for k, v in self.headers.iteritems()}
+        if not headers:
+            headers = {}
+        std_dict = {k.title(): v for k, v in headers.iteritems()}
         for k, v in header_vals:
-            if v:
-                std_dict.setdefault(k.title(), v)
-        self.headers = std_dict
+            if v and k not in std_dict:
+                std_dict[k.title()] = v
+        return std_dict
 
     def create_cookie_header(self):
 
