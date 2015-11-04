@@ -16,6 +16,7 @@ class HttpRequest(object):
     def __init__(self, host):
 
         self.host = host
+        self.protocol = self.get_protocol()
         self.port = self.check_port()
         self.request = None
         self.history = []
@@ -61,11 +62,17 @@ class HttpRequest(object):
             self.get(page)
         return response
 
+    def check_protocol(self):
+
+        """ Strips protocol from hostname and stores it as a variable """
+        split_data = self.host.split('://')
+        self.host = '://'.join(split_data[1:]) # Handle possibility of multiple ://
+        return split_data[0]
+
     def check_port(self):
 
         """ Checks to see if port is attached to host """
-        parsed_host = self.host.strip('http:').strip('https:').strip('//')
-        if ':' in parsed_host:
+        if ':' in self.host:
             self.host, port = parsed_host.split(':')
             s = port.find('/')
             q = port.find('?')

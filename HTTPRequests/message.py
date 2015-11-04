@@ -4,11 +4,11 @@ class HttpRequestMessage(object):
 
     """ Object to encapsulate the concept of an HTTP Request """
 
-    def __init__(self, action, page, dest, headers, **kwargs):
+    def __init__(self, method, page, dst, headers, **kwargs):
 
-        self.action = action.upper()
+        self.method = method.upper()
         self.page = page
-        self.dest = dest
+        self.dst = dst
         self.headers = headers
         self.body = kwargs.get('body', "")
         self.http_ver = kwargs.get('http_version', '1.1')
@@ -30,7 +30,7 @@ class HttpRequestMessage(object):
     def create_request(self):
 
         """ Create request line for resource """
-        params = (self.action, self.page, self.http_ver)
+        params = (self.method, self.page, self.http_ver)
         return "%s %s HTTP/%s\r\n" % (params)
 
     def create_headers(self):
@@ -44,10 +44,10 @@ class HttpRequestMessage(object):
                        ('user-agent', 'RequestBot_0.1'),
                        ('cookie', self.create_cookie_header())]
 
-        if self.action == "POST":
+        if self.method == "POST":
             header_vals.extend(self.create_POST_headers())
 
-        elif self.action == "GET":
+        elif self.method == "GET":
             header_vals.extend(self.create_GET_headers())
 
         self.set_header_vals(header_vals)
@@ -129,8 +129,8 @@ class HttpResponseMessage(object):
     def set_cookies(self):
 
         """ Check for cookies in response headers """
+        cookies = {}
         if "Set-Cookie" in self.headers:
-            cookies = {}
             cookielist = self.headers["Set-Cookie"].split(',')
             if not isinstance(cookielist, list):
                 cookielist = [cookielist]
@@ -138,6 +138,7 @@ class HttpResponseMessage(object):
                 fields = cookie.split(';')
                 delim = fields[0].find('=')
                 name, val = fields[0][:delim], fields[0][delim+1:]
+                # path should NOT be hardcoded
                 path, domain = '/', self.headers.get('Host')
                 args = {'Raw-String': cookie}
                 for elem in fields[1:]:
@@ -149,31 +150,7 @@ class HttpResponseMessage(object):
                     elif elem.lower() == "httponly":
                         args['HttpOnly'] = True
                 cookies[name] = Cookie(name, val, domain, path, **args)
-            return cookies
-            
-class Cookie(object):
-
-    """ Encapsulates the values of an HTTP Cookie """
-    def __init__(self, name, value, domain, path, **kwargs):
-        self.name = name
-        self.value = value
-        self.path = path
-        self.domain = domain
-        self.expires = kwargs.get('Expires')
-        self.max_age = kwargs.get('Max-Age')
-        self.secure = kwargs.get('Secure', False)
-        self.httponly = kwargs.get('HttpOnly', False)
-        self.raw_str = kwargs.get('Raw-String')
-        self.cookie_str = self.set_cookie_str()
-
-    def __str__(self):
-        
-        return self.cookie_str
-
-    def set_cookie_str(self):
-
-        """ Creates HTTP valid cookie string """
-        return "%s=%s;" % (self.name, self.value)
+        return cookies
 
 def get_datetime(dt=None):
 
