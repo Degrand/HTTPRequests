@@ -31,3 +31,79 @@ def test_message_init_w_headers():
     assert msg_w_headers.headers == msg_w_headers.create_headers({'Accept':
                                                     'application/ld+json'})
     assert msg_w_headers.body == ""
+
+def test_create_request_no_cust_ver():
+
+    msg_no_cust_ver = HttpRequestMessage("GET", "/mypage", 'localhost', {})
+
+    msg_str = "GET /mypage HTTP/1.1\r\n"
+
+    assert msg_no_cust_ver.create_request() == msg_str
+
+def test_create_request_cust_ver():
+
+    msg_cust_ver = HttpRequestMessage("GET", "/yourpage", 'localhost', {}, 
+                                          http_version='0.9')
+
+    msg_str = "GET /yourpage HTTP/0.9\r\n"
+
+    assert msg_cust_ver.create_request() == msg_str
+
+def test_create_GET_headers():
+
+    msg_get = HttpRequestMessage("GET", "/", 'localhost', {})
+    get_headers = msg_get.create_GET_headers()
+    assert 'accept' == get_headers[0][0]
+    assert get_headers[0][1] != None
+    assert 'date' == get_headers[1][0]
+    assert get_headers[1][1] != None
+
+def test_create_POST_headers():
+
+    msg_post = HttpRequestMessage("POST", "/", 'localhost', {})
+    post_headers = msg_post.create_POST_headers()
+    assert 'content-type' == post_headers[0][0]
+    assert post_headers[0][1] != None
+    assert 'content-length' == post_headers[1][0]
+    assert post_headers[1][1] >= 0
+    assert 'accept' == post_headers[2][0]
+    assert post_headers[2][1] != None
+
+def test_merge_header_vals():
+
+    msg = HttpRequestMessage("GET", "/", 'localhost', {})
+    header_vals = [('connection', 'keep-alive'),
+                   ('host', 'localhost'),
+                   ('from', 'bot@no.com'),
+                   ('user-agent', 'RequestBot_0.1'),
+                   ('cookie', ''),
+                   ('accept', '*/*')]
+
+    headers = {'Accept': 'application/ld+json'}
+    h_dict = msg.merge_header_vals(header_vals, headers)
+
+    assert 'Connection' in h_dict
+    assert 'Host' in h_dict
+    assert 'Cookie' not in h_dict
+    assert 'Accept' in h_dict
+    assert h_dict['Accept'] == 'application/ld+json'
+
+def test_create_header_str():
+
+    headers = {'Accept': 'application/json',
+               'Connection': 'keep-alive',
+               'User-Agent': 'RequestBot_0.1',
+               'From': 'bot@no.com',
+               'Host': 'localhost',
+               'Date': '2015-01-01'}
+
+    expec_str = ("From: bot@no.com\r\n"
+                 "Connection: keep-alive\r\n"
+                 "Accept: application/json\r\n"
+                 "User-Agent: RequestBot_0.1\r\n"
+                 "Host: localhost\r\n"
+                 "Date: 2015-01-01\r\n")
+
+    msg_w_headers = HttpRequestMessage("GET", "/", 'localhost', headers)
+    header_str = msg_w_headers.create_header_str()
+    assert header_str == expec_str
