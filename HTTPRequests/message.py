@@ -9,10 +9,10 @@ class HttpRequestMessage(object):
         self.method = method.upper()
         self.page = page
         self.dst = dst
-        self.headers = self.create_headers(headers)
+        self.cookies = kwargs.get('cookies', {})
         self.body = kwargs.get('body', "")
         self.http_ver = kwargs.get('http_version', '1.1')
-        self.cookies = kwargs.get('cookies', {})
+        self.headers = self.create_headers(headers)
         self.message = self.create_message()
 
     def __str__(self):
