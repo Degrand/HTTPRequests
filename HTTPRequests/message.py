@@ -1,4 +1,5 @@
 import datetime
+import HTTPRequests.cookie
 
 class HttpRequestMessage(object):
 
