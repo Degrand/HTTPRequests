@@ -4,6 +4,9 @@ from HTTPRequests.message import HttpRequestMessage,  HttpResponseMessage
 
 def test_message_init_no_body():
 
+    """ Test message construction without a body.
+        e.g. standard GET request
+    """
     msg_no_body =  HttpRequestMessage("GET", "/", 'localhost', {})
 
     assert msg_no_body.method == "GET"
@@ -13,6 +16,9 @@ def test_message_init_no_body():
 
 def test_message_init_w_body():
 
+    """ Test message construction with body content.
+        e.g. standard POST request
+    """
     msg_w_body =  HttpRequestMessage("POST", "/", '192.168.0.1', {},
                                          body="body stuff")
     assert msg_w_body.method == "POST"
@@ -22,6 +28,9 @@ def test_message_init_w_body():
 
 def test_message_init_w_headers():
 
+    """ Test message with modified headers.
+        Verify supplied headers overwrite defaults.
+    """
     msg_w_headers = HttpRequestMessage("GET", "/test", '127.0.0.1',
                                            headers={'Accept':
                                                     'application/ld+json'})
@@ -34,6 +43,9 @@ def test_message_init_w_headers():
 
 def test_create_request_no_cust_ver():
 
+    """ Test message for default version (1.1) and correct syntax
+
+    """
     msg_no_cust_ver = HttpRequestMessage("GET", "/mypage", 'localhost', {})
 
     msg_str = "GET /mypage HTTP/1.1\r\n"
@@ -42,6 +54,9 @@ def test_create_request_no_cust_ver():
 
 def test_create_request_cust_ver():
 
+    """ Test message for custom HTTP version
+
+    """
     msg_cust_ver = HttpRequestMessage("GET", "/yourpage", 'localhost', {}, 
                                           http_version='0.9')
 
@@ -51,6 +66,9 @@ def test_create_request_cust_ver():
 
 def test_create_GET_headers():
 
+    """ Test default created GET headers for expected structure
+
+    """
     msg_get = HttpRequestMessage("GET", "/", 'localhost', {})
     get_headers = msg_get.create_GET_headers()
     assert 'accept' == get_headers[0][0]
@@ -60,6 +78,9 @@ def test_create_GET_headers():
 
 def test_create_POST_headers():
 
+    """ Test default created POST headers for expected structure
+
+    """
     msg_post = HttpRequestMessage("POST", "/", 'localhost', {})
     post_headers = msg_post.create_POST_headers()
     assert 'content-type' == post_headers[0][0]
@@ -71,6 +92,9 @@ def test_create_POST_headers():
 
 def test_merge_header_vals():
 
+    """ Test header merge function for correct datastructure
+        and value preferences
+    """
     msg = HttpRequestMessage("GET", "/", 'localhost', {})
     header_vals = [('connection', 'keep-alive'),
                    ('host', 'localhost'),
@@ -90,6 +114,9 @@ def test_merge_header_vals():
 
 def test_create_header_str():
 
+    """ Test header string for correct syntax and expected order
+
+    """
     headers = {'Accept': 'application/json',
                'Connection': 'keep-alive',
                'User-Agent': 'RequestBot_0.1',
