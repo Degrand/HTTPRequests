@@ -10,7 +10,7 @@ class HttpRequestMessage(object):
         self.method = method.upper()
         self.page = page
         self.dst = dst
-        self.cookies = kwargs.get('cookies', {})
+        self.cookies = self.verify_cookies(kwargs.get('cookies', {}))
         self.body = kwargs.get('body', "")
         self.http_ver = kwargs.get('http_version', '1.1')
         self.headers = self.create_headers(headers)
@@ -86,11 +86,18 @@ class HttpRequestMessage(object):
                 std_dict[k.title()] = v
         return std_dict
 
+    def verify_cookies(self, cookies):
+
+        """ Verify validity of provided cookies """
+        if cookies is None:
+            cookies = {}
+        if isinstance(cookies, Cookie):
+            cookies = {"cookie": cookies}
+        return {k: v for k, v in cookies.iteritems() if v != None}
+
     def create_cookie_header(self):
 
         """ Create values for HTTP Cookie header """
-        if self.cookies is None:
-            self.cookies = {}
         retlist = []
         for k, v in self.cookies.iteritems():
             if isinstance(v, Cookie):

@@ -1,6 +1,7 @@
 import pytest
 
 from HTTPRequests.message import HttpRequestMessage,  HttpResponseMessage
+from HTTPRequests.cookie import Cookie
 
 def test_message_init_no_body():
 
@@ -43,9 +44,7 @@ def test_message_init_w_headers():
 
 def test_create_request_no_cust_ver():
 
-    """ Test message for default version (1.1) and correct syntax
-
-    """
+    """ Test message for default version (1.1) and correct syntax """
     msg_no_cust_ver = HttpRequestMessage("GET", "/mypage", 'localhost', {})
 
     msg_str = "GET /mypage HTTP/1.1\r\n"
@@ -54,9 +53,7 @@ def test_create_request_no_cust_ver():
 
 def test_create_request_cust_ver():
 
-    """ Test message for custom HTTP version
-
-    """
+    """ Test message for custom HTTP version """
     msg_cust_ver = HttpRequestMessage("GET", "/yourpage", 'localhost', {}, 
                                           http_version='0.9')
 
@@ -66,9 +63,7 @@ def test_create_request_cust_ver():
 
 def test_create_GET_headers():
 
-    """ Test default created GET headers for expected structure
-
-    """
+    """ Test default created GET headers for expected structure """
     msg_get = HttpRequestMessage("GET", "/", 'localhost', {})
     get_headers = msg_get.create_GET_headers()
     assert 'accept' == get_headers[0][0]
@@ -78,9 +73,7 @@ def test_create_GET_headers():
 
 def test_create_POST_headers():
 
-    """ Test default created POST headers for expected structure
-
-    """
+    """ Test default created POST headers for expected structure """
     msg_post = HttpRequestMessage("POST", "/", 'localhost', {})
     post_headers = msg_post.create_POST_headers()
     assert 'content-type' == post_headers[0][0]
@@ -114,9 +107,7 @@ def test_merge_header_vals():
 
 def test_create_header_str():
 
-    """ Test header string for correct syntax and expected order
-
-    """
+    """ Test header string for correct syntax and expected order """
     headers = {'Accept': 'application/json',
                'Connection': 'keep-alive',
                'User-Agent': 'RequestBot_0.1',
@@ -134,3 +125,46 @@ def test_create_header_str():
     msg_w_headers = HttpRequestMessage("GET", "/", 'localhost', headers)
     header_str = msg_w_headers.create_header_str()
     assert header_str == expec_str
+
+def test_create_cookie_header_no_cookie():
+
+    """ Test header creation for cookies from no supplied cookie """
+    msg_no_cookie = HttpRequestMessage("GET", "/", 'localhost', {})
+    assert msg_no_cookie.create_cookie_header() == ""
+
+def test_create_cookie_header_none_cookie():
+
+    """ Test header creation for cookies when cookie is declared to be none """
+    msg_none_cookie = HttpRequestMessage("GET", "/", 'localhost', {}, cookies=None)
+    assert msg_none_cookie.cookies == {}
+    assert msg_none_cookie.create_cookie_header() == ""
+
+def test_create_cookie_header_dict_cookie():
+
+    """ Test header creation for cookies when cookie contents in dictionary """
+    cookie_dict = {"JSESSIONID": "ABC123DEF456",
+                 "SPECIALTOKEN": "TOPS.E.KRATZ"}
+    msg_dict_cookie = HttpRequestMessage("GET", "/", 'localhost', {}, cookies=cookie_dict)
+    cookie_header = msg_dict_cookie.create_cookie_header()
+    assert cookie_header == "SPECIALTOKEN=TOPS.E.KRATZ; JSESSIONID=ABC123DEF456;"
+
+def test_create_cookie_header_obj_cookie():
+
+    """ Test header creation for cookies when cookie contents in obj form """
+    cookie_one = Cookie("CSRF_TOKEN", "1234zyxw", "mydomain.com", "/")
+    msg_obj_cookie = HttpRequestMessage("GET", "/", 'localhost', {}, cookies=cookie_one)
+    assert msg_obj_cookie.create_cookie_header() == "CSRF_TOKEN=1234zyxw;"
+
+def test_create_cookie_header_mixed_cookies():
+
+    """ Test header createion for cookies when cookie contents
+        are both dict and obj
+    """
+    cookie_one = Cookie("CSRF_TOKEN", "1234zyxw", "mydomain.com", "/")
+    cookie_two = None
+    cookie_dict = { "JSESSIONID": "ABC123DEF456",
+                    "cookie_obj123": cookie_one,
+                    "cookie_obj2": cookie_two,
+                    "Tracker": "trackingnum_1"}
+    msg_mixed_cookie = HttpRequestMessage("GET", "/", 'localhost', {}, cookies=cookie_dict)
+    assert msg_mixed_cookie.create_cookie_header() == "Tracker=trackingnum_1; CSRF_TOKEN=1234zyxw; JSESSIONID=ABC123DEF456;"
