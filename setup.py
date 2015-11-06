@@ -8,7 +8,7 @@ setup(
     description = "Basic HTTP request library",
     license = "BSD",
     keywords = "request http",
-    url = "http://github.com/degrand/HTTPRequests",
+    url = "http://github.com/nateprewitt/HTTPRequests",
     packages = ['HTTPRequests'],
     classifiers = ["Development Status :: 2 - Pre-Alpha",
                    "Environment :: Console",
