@@ -16,7 +16,6 @@ class HttpRequest(object):
     def __init__(self, host):
 
         self.host = host
-        self.protocol = self.get_protocol()
         self.port = self.check_port()
         self.request = None
         self.history = []
@@ -116,7 +115,7 @@ def parse_headers(header_data):
 
     """ Converts header string into dictionary """
     headers = [k.split(':') for k in header_data.split('\r\n') if k]
-    return {k[0].strip():':'.join(k[1:]).strip() for k in headers}
+    return {k[0].strip().title():':'.join(k[1:]).strip() for k in headers}
 
 def encode_data(data):
 
