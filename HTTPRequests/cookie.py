@@ -1,3 +1,8 @@
+"""
+    This module handles cookie content encapsulation
+
+"""
+
 class Cookie(object):
 
     """ Encapsulates the values of an HTTP Cookie """
@@ -6,11 +11,7 @@ class Cookie(object):
         self.value = value
         self.path = path
         self.domain = domain
-        self.expires = kwargs.get('Expires')
-        self.max_age = kwargs.get('Max-Age')
-        self.secure = kwargs.get('Secure', False)
-        self.httponly = kwargs.get('HttpOnly', False)
-        self.raw_str = kwargs.get('Raw-String')
+        self.attributes = self.assign_attributes(kwargs)
         self.cookie_str = self.set_cookie_str()
 
     def __str__(self):
@@ -21,3 +22,13 @@ class Cookie(object):
 
         """ Creates HTTP valid cookie string """
         return "%s=%s;" % (self.name, self.value)
+
+    def assign_attributes(self, attrs):
+
+        """ Assign additional cookie attributes to dictionary """
+        attr_dict = {"Expires": attrs.get('Expires'),
+                     "Max-Age": attrs.get('Max-Age'),
+                     "Secure": attrs.get('Secure', False),
+                     "HttpOnly": attrs.get('HttpOnly', False),
+                     "Raw-String": attrs.get('Raw-String')}
+        return attr_dict

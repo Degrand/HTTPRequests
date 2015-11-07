@@ -1,6 +1,9 @@
-import pytest
+"""
+    This module handles testing for HttpRequestMessage and HttpResponseMessage
 
-from HTTPRequests.message import HttpRequestMessage,  HttpResponseMessage
+"""
+
+from HTTPRequests.message import HttpRequestMessage, HttpResponseMessage
 from HTTPRequests.cookie import Cookie
 
 def test_message_init_no_body():
@@ -8,7 +11,7 @@ def test_message_init_no_body():
     """ Test message construction without a body.
         e.g. standard GET request
     """
-    msg_no_body =  HttpRequestMessage("GET", "/", 'localhost', {})
+    msg_no_body = HttpRequestMessage("GET", "/", 'localhost', {})
 
     assert msg_no_body.method == "GET"
     assert msg_no_body.page == "/"
@@ -20,8 +23,8 @@ def test_message_init_w_body():
     """ Test message construction with body content.
         e.g. standard POST request
     """
-    msg_w_body =  HttpRequestMessage("POST", "/", '192.168.0.1', {},
-                                         body="body stuff")
+    msg_w_body = HttpRequestMessage("POST", "/", '192.168.0.1', {},
+                                    body="body stuff")
     assert msg_w_body.method == "POST"
     assert msg_w_body.page == "/"
     assert msg_w_body.headers == msg_w_body.create_headers()
@@ -32,14 +35,13 @@ def test_message_init_w_headers():
     """ Test message with modified headers.
         Verify supplied headers overwrite defaults.
     """
+    header_dict = {'Accept': 'application/ld+json'}
     msg_w_headers = HttpRequestMessage("GET", "/test", '127.0.0.1',
-                                           headers={'Accept':
-                                                    'application/ld+json'})
+                                       headers=header_dict)
 
     assert msg_w_headers.method == "GET"
     assert msg_w_headers.page == "/test"
-    assert msg_w_headers.headers == msg_w_headers.create_headers({'Accept':
-                                                    'application/ld+json'})
+    assert msg_w_headers.headers == msg_w_headers.create_headers(header_dict)
     assert msg_w_headers.body == ""
 
 def test_create_request_no_cust_ver():
@@ -54,28 +56,28 @@ def test_create_request_no_cust_ver():
 def test_create_request_cust_ver():
 
     """ Test message for custom HTTP version """
-    msg_cust_ver = HttpRequestMessage("GET", "/yourpage", 'localhost', {}, 
-                                          http_version='0.9')
+    msg_cust_ver = HttpRequestMessage("GET", "/yourpage", 'localhost', {},
+                                      http_version='0.9')
 
     msg_str = "GET /yourpage HTTP/0.9\r\n"
 
     assert msg_cust_ver.create_request() == msg_str
 
-def test_create_GET_headers():
+def test_create_get_headers():
 
     """ Test default created GET headers for expected structure """
     msg_get = HttpRequestMessage("GET", "/", 'localhost', {})
-    get_headers = msg_get.create_GET_headers()
+    get_headers = msg_get.create_get_headers()
     assert 'accept' == get_headers[0][0]
     assert get_headers[0][1] != None
     assert 'date' == get_headers[1][0]
     assert get_headers[1][1] != None
 
-def test_create_POST_headers():
+def test_create_post_headers():
 
     """ Test default created POST headers for expected structure """
     msg_post = HttpRequestMessage("POST", "/", 'localhost', {})
-    post_headers = msg_post.create_POST_headers()
+    post_headers = msg_post.create_post_headers()
     assert 'content-type' == post_headers[0][0]
     assert post_headers[0][1] != None
     assert 'content-length' == post_headers[1][0]
@@ -143,7 +145,7 @@ def test_create_cookie_header_dict_cookie():
 
     """ Test header creation for cookies when cookie contents in dictionary """
     cookie_dict = {"JSESSIONID": "ABC123DEF456",
-                 "SPECIALTOKEN": "TOPS.E.KRATZ"}
+                   "SPECIALTOKEN": "TOPS.E.KRATZ"}
     msg_dict_cookie = HttpRequestMessage("GET", "/", 'localhost', {}, cookies=cookie_dict)
     cookie_header = msg_dict_cookie.create_cookie_header()
     assert cookie_header == "SPECIALTOKEN=TOPS.E.KRATZ; JSESSIONID=ABC123DEF456;"
@@ -162,9 +164,12 @@ def test_create_cookie_header_mixed_cookies():
     """
     cookie_one = Cookie("CSRF_TOKEN", "1234zyxw", "mydomain.com", "/")
     cookie_two = None
-    cookie_dict = { "JSESSIONID": "ABC123DEF456",
-                    "cookie_obj123": cookie_one,
-                    "cookie_obj2": cookie_two,
-                    "Tracker": "trackingnum_1"}
+    cookie_dict = {"JSESSIONID": "ABC123DEF456",
+                   "cookie_obj123": cookie_one,
+                   "cookie_obj2": cookie_two,
+                   "Tracker": "trackingnum_1"}
     msg_mixed_cookie = HttpRequestMessage("GET", "/", 'localhost', {}, cookies=cookie_dict)
-    assert msg_mixed_cookie.create_cookie_header() == "Tracker=trackingnum_1; CSRF_TOKEN=1234zyxw; JSESSIONID=ABC123DEF456;"
+    cookie_str = ("Tracker=trackingnum_1; "
+                  "CSRF_TOKEN=1234zyxw; "
+                  "JSESSIONID=ABC123DEF456;")
+    assert msg_mixed_cookie.create_cookie_header() == cookie_str

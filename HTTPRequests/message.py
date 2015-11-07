@@ -1,3 +1,8 @@
+"""
+    This module handles basic HTTP message contents.
+
+"""
+
 import datetime
 from HTTPRequests.cookie import Cookie
 
@@ -44,10 +49,10 @@ class HttpRequestMessage(object):
                        ('cookie', self.create_cookie_header())]
 
         if self.method == "POST":
-            header_vals.extend(self.create_POST_headers())
+            header_vals.extend(self.create_post_headers())
 
         elif self.method == "GET":
-            header_vals.extend(self.create_GET_headers())
+            header_vals.extend(self.create_get_headers())
 
         return self.merge_header_vals(header_vals, headers)
 
@@ -57,7 +62,7 @@ class HttpRequestMessage(object):
         retlist = ["%s: %s\r\n" % (k, v) for k, v in self.headers.iteritems()]
         return ''.join(retlist)
 
-    def create_POST_headers(self):
+    def create_post_headers(self):
 
         """ Create POST specific HTTP request headers """
         header_vals = [('content-type', 'application/x-www-form-urlencoded'),
@@ -66,7 +71,7 @@ class HttpRequestMessage(object):
 
         return header_vals
 
-    def create_GET_headers(self):
+    def create_get_headers(self):
 
         """ Create GET specific HTTP request headers """
         header_vals = [('accept', 'text/html, text/plain'),
