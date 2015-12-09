@@ -81,7 +81,7 @@ class HttpRequestMessage(object):
             headers = {}
         std_dict = {k.title(): v for k, v in headers.iteritems()}
         for k, v in header_vals:
-            if v and k not in std_dict:
+            if v and k.title() not in std_dict:
                 std_dict[k.title()] = v
         return std_dict
 
@@ -90,6 +90,8 @@ class HttpRequestMessage(object):
         """ Create values for HTTP Cookie header """
         if self.cookies is None:
             self.cookies = {}
+        if isinstance(self.cookies, Cookie):
+            self.cookies = {"Cookie": self.cookies"}
         retlist = []
         for k, v in self.cookies.iteritems():
             if isinstance(v, Cookie):
