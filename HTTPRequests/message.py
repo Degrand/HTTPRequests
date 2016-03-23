@@ -59,7 +59,7 @@ class HttpRequestMessage(object):
     def create_header_str(self):
 
         """ Convert header dictionary into valid HTTP Headers """
-        retlist = ["%s: %s\r\n" % (k, v) for k, v in self.headers.iteritems()]
+        retlist = ["%s: %s\r\n" % (k, v) for k, v in self.headers.items()]
         return ''.join(retlist)
 
     def create_post_headers(self):
@@ -85,7 +85,7 @@ class HttpRequestMessage(object):
         #NOTE: Possible collisions if value assigned twice with varying case
         if not headers:
             headers = {}
-        std_dict = {k.title(): v for k, v in headers.iteritems()}
+        std_dict = {k.title(): v for k, v in headers.items()}
         for k, v in header_vals:
             if v and k.title() not in std_dict:
                 std_dict[k.title()] = v
@@ -98,7 +98,7 @@ class HttpRequestMessage(object):
             cookies = {}
         if isinstance(cookies, Cookie):
             cookies = {"cookie": cookies}
-        return {k: v for k, v in cookies.iteritems() if v != None}
+        return {k: v for k, v in cookies.items() if v != None}
 
     def create_cookie_header(self):
 
@@ -108,7 +108,7 @@ class HttpRequestMessage(object):
         if isinstance(self.cookies, Cookie):
             self.cookies = {"Cookie": self.cookies}
         retlist = []
-        for k, v in self.cookies.iteritems():
+        for k, v in self.cookies.items():
             if isinstance(v, Cookie):
                 retlist.append(str(v))
             else:

@@ -122,7 +122,7 @@ def encode_data(data):
 
     """ Converts data dictionary into urlencoded string """
 
-    strlist = ["%s=%s" % (k, url_encode(v)) for k, v in data.iteritems()]
+    strlist = ["%s=%s" % (k, url_encode(v)) for k, v in data.items()]
     return '&'.join(strlist)
 
 def url_encode(string):
@@ -157,6 +157,6 @@ def url_encode(string):
                    '_':'%5F'}
 
     string = string.replace('%', '%25')
-    for k, v in percent_map.iteritems():
+    for k, v in percent_map.items():
         string = string.replace(k, v)
     return string
