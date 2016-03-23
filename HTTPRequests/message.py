@@ -106,7 +106,7 @@ class HttpRequestMessage(object):
         if self.cookies is None:
             self.cookies = {}
         if isinstance(self.cookies, Cookie):
-            self.cookies = {"Cookie": self.cookies"}
+            self.cookies = {"Cookie": self.cookies}
         retlist = []
         for k, v in self.cookies.iteritems():
             if isinstance(v, Cookie):
