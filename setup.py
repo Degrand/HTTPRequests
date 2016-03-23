@@ -6,7 +6,7 @@ setup(
     version = "0.0.1",
     author = "Nate Prewitt",
     description = "Basic HTTP request library",
-    license = "BSD",
+    license = "ISC",
     keywords = "request http",
     url = "http://github.com/nateprewitt/HTTPRequests",
     packages = ['HTTPRequests'],
@@ -14,6 +14,6 @@ setup(
                    "Environment :: Console",
                    "Programming Language :: Python :: 2.7",
                    "Topic :: Internet :: WWW/HTTP",
-                   "Licesnse :: OSI Approved :: BSD License"
+                   "Licesnse :: OSI Approved :: ISC License (ISCL)"
     ],
 )

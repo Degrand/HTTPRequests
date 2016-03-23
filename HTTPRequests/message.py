@@ -103,6 +103,10 @@ class HttpRequestMessage(object):
     def create_cookie_header(self):
 
         """ Create values for HTTP Cookie header """
+        if self.cookies is None:
+            self.cookies = {}
+        if isinstance(self.cookies, Cookie):
+            self.cookies = {"Cookie": self.cookies"}
         retlist = []
         for k, v in self.cookies.iteritems():
             if isinstance(v, Cookie):

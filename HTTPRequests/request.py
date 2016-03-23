@@ -41,7 +41,8 @@ class HttpRequest(object):
     def head(self, page='/', headers=None):
 
         """ Perform a HEAD request to host """
-        self.request = HttpRequestMessage('HEAD', page, self.host, headers)
+        self.request = HttpRequestMessage('HEAD', page, self.host,
+                                          headers=headers)
         self.history.append(self.request)
         return self.do_request()
 
