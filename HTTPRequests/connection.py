@@ -20,9 +20,9 @@ class WebSocket(object):
     def connect(self):
 
         """ Establish connection with server """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.host, self.port))
-        return s
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((self.host, self.port))
+        return sock
 
     def send(self, msg):
 
