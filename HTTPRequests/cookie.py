@@ -26,9 +26,9 @@ class Cookie(object):
     def assign_attributes(self, attrs):
 
         """ Assign additional cookie attributes to dictionary """
-        attr_dict = {"Expires": attrs.get('Expires'),
-                     "Max-Age": attrs.get('Max-Age'),
-                     "Secure": attrs.get('Secure', False),
-                     "HttpOnly": attrs.get('HttpOnly', False),
-                     "Raw-String": attrs.get('Raw-String')}
+        attr_dict = {"Expires": attrs.get('expires'),
+                     "Max-Age": attrs.get('maxage'),
+                     "Secure": attrs.get('secure', False),
+                     "HttpOnly": attrs.get('httponly', False),
+                     "Raw-String": attrs.get('rawstring')}
         return attr_dict
