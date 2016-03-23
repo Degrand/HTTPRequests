@@ -1,4 +1,10 @@
+"""
+    This module handles basic HTTP message contents.
+
+"""
+
 import datetime
+from HTTPRequests.cookie import Cookie
 
 class HttpRequestMessage(object):
 
@@ -9,10 +15,10 @@ class HttpRequestMessage(object):
         self.method = method.upper()
         self.page = page
         self.dst = dst
-        self.headers = self.create_headers(headers)
+        self.cookies = self.verify_cookies(kwargs.get('cookies', {}))
         self.body = kwargs.get('body', "")
         self.http_ver = kwargs.get('http_version', '1.1')
-        self.cookies = kwargs.get('cookies', {})
+        self.headers = self.create_headers(headers)
         self.message = self.create_message()
 
     def __str__(self):
@@ -43,10 +49,10 @@ class HttpRequestMessage(object):
                        ('cookie', self.create_cookie_header())]
 
         if self.method == "POST":
-            header_vals.extend(self.create_POST_headers())
+            header_vals.extend(self.create_post_headers())
 
         elif self.method == "GET":
-            header_vals.extend(self.create_GET_headers())
+            header_vals.extend(self.create_get_headers())
 
         return self.merge_header_vals(header_vals, headers)
 
@@ -56,7 +62,7 @@ class HttpRequestMessage(object):
         retlist = ["%s: %s\r\n" % (k, v) for k, v in self.headers.iteritems()]
         return ''.join(retlist)
 
-    def create_POST_headers(self):
+    def create_post_headers(self):
 
         """ Create POST specific HTTP request headers """
         header_vals = [('content-type', 'application/x-www-form-urlencoded'),
@@ -65,7 +71,7 @@ class HttpRequestMessage(object):
 
         return header_vals
 
-    def create_GET_headers(self):
+    def create_get_headers(self):
 
         """ Create GET specific HTTP request headers """
         header_vals = [('accept', 'text/html, text/plain'),
@@ -84,6 +90,15 @@ class HttpRequestMessage(object):
             if v and k.title() not in std_dict:
                 std_dict[k.title()] = v
         return std_dict
+
+    def verify_cookies(self, cookies):
+
+        """ Verify validity of provided cookies """
+        if cookies is None:
+            cookies = {}
+        if isinstance(cookies, Cookie):
+            cookies = {"cookie": cookies}
+        return {k: v for k, v in cookies.iteritems() if v != None}
 
     def create_cookie_header(self):
 

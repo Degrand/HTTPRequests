@@ -1,3 +1,8 @@
+"""
+    This module handles basic TCP connections for requests
+
+"""
+
 import socket
 
 class WebSocket(object):

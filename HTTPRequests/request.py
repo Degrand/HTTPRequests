@@ -16,7 +16,6 @@ class HttpRequest(object):
     def __init__(self, host):
 
         self.host = host
-        self.protocol = self.get_protocol()
         self.port = self.check_port()
         self.request = None
         self.history = []
@@ -25,8 +24,8 @@ class HttpRequest(object):
     def get(self, page='/', headers=None, cookies=None):
 
         """ Perform a GET request to host """
-        self.request = HttpRequestMessage('GET', page, self.host, 
-                                              headers, cookies=cookies)
+        self.request = HttpRequestMessage('GET', page, self.host,
+                                          headers, cookies=cookies)
         self.history.append(self.request)
         return self.do_request()
 
@@ -34,8 +33,8 @@ class HttpRequest(object):
 
         """ Perform a POST request to host """
         data = encode_data(data)
-        self.request = HttpRequestMessage('POST', page, self.host, headers, 
-                                              body=data, cookies=cookies)
+        self.request = HttpRequestMessage('POST', page, self.host, headers,
+                                          body=data, cookies=cookies)
         self.history.append(self.request)
         return self.do_request()
 
@@ -73,7 +72,7 @@ class HttpRequest(object):
 
         """ Checks to see if port is attached to host """
         if ':' in self.host:
-            self.host, port = parsed_host.split(':')
+            self.host, port = self.host.split(':')
             s = port.find('/')
             q = port.find('?')
             if s != -1:
@@ -116,15 +115,15 @@ def parse_headers(header_data):
 
     """ Converts header string into dictionary """
     headers = [k.split(':') for k in header_data.split('\r\n') if k]
-    return {k[0].strip():':'.join(k[1:]).strip() for k in headers}
+    return {k[0].strip().title():':'.join(k[1:]).strip() for k in headers}
 
 def encode_data(data):
 
     """ Converts data dictionary into urlencoded string """
-    
+
     strlist = ["%s=%s" % (k, url_encode(v)) for k, v in data.iteritems()]
     return '&'.join(strlist)
-    
+
 def url_encode(string):
 
     """ Replaces problem characters with appropriate percent encoding """
